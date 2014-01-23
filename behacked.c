@@ -21,7 +21,8 @@ int main(int argc, char **argv){
 	move(5,5);
 	refresh();
 	while(rmcombs());
-	cx = 5; cy = 5;
+	cx = cy = 5;
+	sx = sy = -1;
 	while((c = getch()) != 3){
 		switch(c){
 			case KEY_LEFT:
@@ -41,12 +42,47 @@ int main(int argc, char **argv){
 				if(cy < HEIGHT-1) cy++;
 				break;
 			case 'n':
-				mvprintw(14,2,"          ");
+				mvprintw(HEIGHT+4,2,"          ");
 				n = 0;
 				clpendsh();
 				ncomb(cx,cy,&n);
-				mvprintw(14,2,"(%d,%d) %d*%d",cx,cy,n,grid[cy][cx]);
+				mvprintw(HEIGHT+4,2,"(%d,%d) %d*%d",cx,cy,n,grid[cy][cx]);
 				refresh();
+				break;
+			case 'N':
+				mvprintw(2,WIDTH+5,"    ");
+				mvprintw(2,WIDTH+5,"%d",ncombs());
+				refresh();
+				break;
+			case ' ':
+				if(sx == -1){
+					sx = cx;
+					sy = cy;
+					attron(COLOR_PAIR(grid[cy][cx]));
+					mvaddch(cy,cx,'*'|A_BOLD);
+					attroff(COLOR_PAIR(grid[cy][cx]));
+				}else{
+					if((sx-cx == 1 || sx-cx == -1) ^ (sy-cy == 1 || sy-cy == -1)){
+						int r = grid[sy][sx];
+						attron(COLOR_PAIR(grid[cy][cx]));
+						mvaddch(cy,cx,'*'|A_BOLD);
+						attroff(COLOR_PAIR(grid[cy][cx]));
+						grid[sy][sx] = grid[cy][cx];
+						grid[cy][cx] = r;
+						redraw();
+						msleep(150);
+						if(rmcombs()){
+							while(rmcombs());
+						}else{
+							r = grid[sy][sx];
+							grid[sy][sx] = grid[cy][cx];
+							grid[cy][cx] = r;
+							redraw();
+						}
+					}
+					sy = sx = -1;
+				}
+				break;
 			default:
 				mvprintw(12,5,"%d",c);
 		}
@@ -137,6 +173,17 @@ int rmcombs(){
 	breakcombs();
 	refill();
 	return hascombs;
+}
+
+/**TODO: Returns the number of potential combinations.*/
+int ncombs(){
+/*	int i,j,n=0;
+	clshadow();
+	for(j=0;j<HEIGHT-1;j++){
+		for(i=0;i<WIDTH-1;i++){
+		}
+	}*/
+	return 0;
 }
 
 /**Returns the number of similar gems connected to the specified one (plus one.)*/
