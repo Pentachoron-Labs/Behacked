@@ -41,22 +41,24 @@ int main(int argc, char **argv){
 			case 'j':
 				if(cy < HEIGHT-1) cy++;
 				break;
+#ifdef DEBUG
 			case 'n':
-				mvprintw(HEIGHT+4,2,"          ");
-				n = 0;
+				redraw();
 				clpendsh();
+				n = 0;
 				ncomb(cx,cy,&n);
 				mvprintw(HEIGHT+4,2,"(%d,%d) %d*%d",cx,cy,n,grid[cy][cx]);
 				refresh();
 				break;
 			case 'N':
-				mvprintw(2,WIDTH+5,"    ");
+				redraw();
 				mvprintw(2,WIDTH+5,"%d",ncombs());
 				refresh();
 				break;
 			case 'r':
 				redraw();
 				break;
+#endif
 			case ' ':
 				if(sx == -1){
 					sx = cx;
@@ -74,6 +76,12 @@ int main(int argc, char **argv){
 						msleep(150);
 						if(rmcombs()){
 							while(rmcombs());
+							if(ncombs() == 0){
+								mvprintw(4,(WIDTH/2)-5,"GAME OVER");
+								getch();
+								endwin();
+								exit(0);
+							}
 						}else{
 							r = grid[sy][sx];
 							grid[sy][sx] = grid[cy][cx];
@@ -84,8 +92,10 @@ int main(int argc, char **argv){
 					sy = sx = -1;
 				}
 				break;
+#ifdef DEBUG
 			default:
-				mvprintw(12,5,"%d",c);
+				mvprintw(HEIGHT+2,5,"%d",c);
+#endif
 		}
 		move(cy,cx);
 		refresh();
@@ -129,6 +139,7 @@ void redraw(){
 			attroff(COLOR_PAIR(r));
 		}
 	}
+	mvprintw(4,WIDTH+5,"Score: %d",score);
 	refresh();
 }
 
@@ -158,14 +169,15 @@ void acceptpendsh(){
 
 /**Removes combinations (groups of four) in the grid and refills; returns 1 if any were found.*/
 int rmcombs(){
-	int i,j,hascombs=0;
+	int x,y,hascombs=0;
 	clshadow();
-	for(j=0;j<HEIGHT;j++){
-		for(i=0;i<WIDTH;i++){
+	for(y=0;y<HEIGHT;y++){
+		for(x=0;x<WIDTH;x++){
 			int n = 0;
 			clpendsh();
-			ncomb(i,j,&n);
-			if(n >= 4 && grid[j][i] != 0){
+			ncomb(x,y,&n);
+			if(n >= 4 && grid[y][x] != 0){
+				score += 10;
 				hascombs = 1;
 				acceptpendsh();
 			}
@@ -183,12 +195,12 @@ int ncombs(){
 	for(x=0;x<WIDTH;x++){
 		for(y=0;y<HEIGHT-1;y++){
 			//swap (x,y) and (x,y+1)
-			int r = grid[y][x];
-			int q = 0;
+			int r = grid[y][x],q;
 			grid[y][x] = grid[y+1][x];
 			grid[y+1][x] = r;
 			//count the combinations
 			clpendsh();
+			q = 0;
 			ncomb(x,y,&q);
 			n += (q >= 4);
 			clpendsh();
@@ -204,11 +216,12 @@ int ncombs(){
 	for(x=0;x<WIDTH-1;x++){
 		for(y=0;y<HEIGHT;y++){
 			//swap (x,y) and (x+1,y)
-			int r = grid[y][x],q=0;
+			int r = grid[y][x],q;
 			grid[y][x] = grid[y][x+1];
 			grid[y][x+1] = r;
 			//count the combinations
 			clpendsh();
+			q = 0;
 			ncomb(x,y,&q);
 			n += (q >= 4);
 			clpendsh();
