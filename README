@@ -1,0 +1,29 @@
+1. INTRODUCTION
+
+This is Behacked. It's like Bejeweled, but it uses ncurses. The other
+difference is that instead of trying to get a row of three the goal is
+to get a group of four connected gems.
+
+Controls are like so:
+
+arrow keys / hjkl - move
+space - select a gem for swapping
+
+Move to a gem, press space, move to an adjacent gem, press space
+again; if you can swap them and create a group of four, then you will
+earn points. Simple as that.
+
+There are a couple other keys that only exist for debugging
+purposes. If you don't want these you should probably turn DEBUG off.
+
+2. COMPILING
+
+It's one C file; you can figure out how you want to compile it ;-)
+
+(but `gcc behacked.c -o behacked -lncurses` should probably work for
+most people)
+
+3. LICENSE
+
+Behacked is public domain. Do whatever you like with it. It'd be nice
+if you credit the original source, though.
